@@ -1,0 +1,535 @@
+
+<!-- tai_he_tang_tcm_clinic/frontend/herbs.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>药材展示 - 泰和堂</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.loli.net/css?family=Noto+Serif+SC:400,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Serif SC', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4efe9 100%);
+            min-height: 100vh;
+        }
+        .nav-item:hover {
+            transform: translateY(-3px);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .herb-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+        .herb-tab {
+            transition: all 0.3s ease;
+        }
+        .herb-tab.active {
+            background-color: #047857;
+            color: white;
+        }
+        .herb-detail {
+            display: none;
+        }
+        .herb-detail.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- 粒子特效背景 -->
+    <canvas id="particles" class="particles"></canvas>
+
+    <!-- 导航栏 -->
+    <nav class="bg-white bg-opacity-90 shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <a href="index.html" class="text-2xl font-bold text-green-800">泰和堂</a>
+                    <span class="ml-2 text-sm text-green-600">传统中医 · 现代科技</span>
+                </div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="index.html" class="nav-item text-gray-600 hover:text-green-700 transition-all">首页</a>
+                    <a href="knowledge.html" class="nav-item text-gray-600 hover:text-green-700 transition-all">中医知识库</a>
+                    <a href="virtual-tour.html" class="nav-item text-gray-600 hover:text-green-700 transition-all">虚拟导览</a>
+                    <a href="herbs.html" class="nav-item text-green-800 font-medium transition-all">药材展示</a>
+                    <a href="#" class="nav-item text-gray-600 hover:text-green-700 transition-all">预约诊疗</a>
+                </div>
+                <button class="md:hidden focus:outline-none">
+                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 药材展示主内容 -->
+    <section class="py-12">
+        <div class="container mx-auto px-6">
+            <h1 class="text-4xl font-bold text-center text-green-900 mb-8">药材展示</h1>
+            <p class="text-lg text-center text-gray-700 mb-12 max-w-3xl mx-auto">
+                精选道地药材，严格把控质量，为您介绍常用中药材的功效与使用方法
+            </p>
+
+            <!-- 药材分类导航 -->
+            <div class="flex overflow-x-auto pb-2 mb-8 scrollbar-hide">
+                <div class="flex space-x-1 mx-auto">
+                    <button onclick="filterHerbs('all')" class="herb-tab px-6 py-2 rounded-lg active transition-all">全部药材</button>
+                    <button onclick="filterHerbs('tonic')" class="herb-tab px-6 py-2 rounded-lg hover:bg-green-100 transition-all">补益类</button>
+                    <button onclick="filterHerbs('heat-clearing')" class="herb-tab px-6 py-2 rounded-lg hover:bg-green-100 transition-all">清热类</button>
+                    <button onclick="filterHerbs('blood-activating')" class="herb-tab px-6 py-2 rounded-lg hover:bg-green-100 transition-all">活血类</button>
+                    <button onclick="filterHerbs('qi-regulating')" class="herb-tab px-6 py-2 rounded-lg hover:bg-green-100 transition-all">理气类</button>
+                    <button onclick="filterHerbs('dampness-removing')" class="herb-tab px-6 py-2 rounded-lg hover:bg-green-100 transition-all">祛湿类</button>
+                </div>
+            </div>
+
+            <!-- 搜索框 -->
+            <div class="max-w-2xl mx-auto mb-12">
+                <div class="relative">
+                    <input type="text" id="herbSearch" placeholder="搜索药材..." class="w-full px-6 py-3 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                    <button onclick="searchHerbs()" class="absolute right-3 top-1/2 transform -translate-y-1/2 bg-green-600 text-white p-2 rounded-full hover:bg-green-700 transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 药材展示 -->
+            <div id="herbsContainer" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- 药材卡片将通过JavaScript动态加载 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 药材详情模态框 -->
+    <div id="herbModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 id="herbModalTitle" class="text-2xl font-bold text-green-800"></h2>
+                    <button onclick="closeHerbModal()" class="text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col md:flex-row gap-8">
+                    <div class="md:w-1/3">
+                        <img id="herbModalImage" src="" alt="" class="w-full h-auto rounded-lg shadow-md">
+                        <div class="mt-4">
+                            <h3 class="font-bold text-lg text-green-800 mb-2">基本信息</h3>
+                            <div class="space-y-2">
+                                <p><span class="font-medium">拉丁名:</span> <span id="herbLatinName"></span></p>
+                                <p><span class="font-medium">性味:</span> <span id="herbNature"></span></p>
+                                <p><span class="font-medium">归经:</span> <span id="herbMeridian"></span></p>
+                                <p><span class="font-medium">用法用量:</span> <span id="herbDosage"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="md:w-2/3">
+                        <div class="mb-6">
+                            <h3 class="font-bold text-lg text-green-800 mb-2">功效主治</h3>
+                            <p id="herbEffects" class="text-gray-700"></p>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <h3 class="font-bold text-lg text-green-800 mb-2">临床应用</h3>
+                            <p id="herbApplications" class="text-gray-700"></p>
+                        </div>
+                        
+                        <div>
+                            <h3 class="font-bold text-lg text-green-800 mb-2">注意事项</h3>
+                            <p id="herbPrecautions" class="text-gray-700"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 -->
+    <footer class="bg-green-900 text-white py-12">
+        <div class="container mx-auto px-6">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">泰和堂</h3>
+                    <p class="text-green-200">传承中医精髓，融合现代科技，为您提供专业的中医健康服务。</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="index.html" class="text-green-200 hover:text-white transition-all">首页</a></li>
+                        <li><a href="knowledge.html" class="text-green-200 hover:text-white transition-all">中医知识库</a></li>
+                        <li><a href="virtual-tour.html" class="text-green-200 hover:text-white transition-all">虚拟导览</a></li>
+                        <li><a href="herbs.html" class="text-green-200 hover:text-white transition-all">药材展示</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">联系我们</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>北京市朝阳区中医大道88号</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span>010-88889999</span>
+                        </li>
+                        <li class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>info@taihetang.com</span>
+                        </li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">营业时间</h3>
+                    <ul class="space-y-2">
+                        <li class="flex justify-between">
+                            <span>周一至周五</span>
+                            <span>9:00 - 18:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>周六</span>
+                            <span>9:00 - 15:00</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span>周日</span>
+                            <span>休息</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-green-800 mt-8 pt-8 text-center text-green-400">
+                <p>© 2025 泰和堂中医馆. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 粒子特效
+        document.addEventListener('DOMContentLoaded', function() {
+            const canvas = document.getElementById('particles');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const particles = [];
+            const particleCount = window.innerWidth < 768 ? 30 : 60;
+            
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 3 + 1,
+                    speedX: Math.random() * 1 - 0.5,
+                    speedY: Math.random() * 1 - 0.5,
+                    color: `rgba(16, 185, 129, ${Math.random() * 0.4 + 0.1})`
+                });
+            }
+            
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                for (let i = 0; i < particles.length; i++) {
+                    const p = particles[i];
+                    
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    
+                    if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+            
+            window.addEventListener('resize', function() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+            
+            // 移动端菜单切换
+            const mobileMenuButton = document.querySelector('button.md\\:hidden');
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function() {
+                    const navItems = document.querySelector('.md\\:hidden + .md\\:flex');
+                    if (navItems) {
+                        navItems.classList.toggle('hidden');
+                    }
+                });
+            }
+
+            // 初始化药材数据
+            initHerbsData();
+            loadHerbs('all');
+        });
+
+        // 药材数据
+        function initHerbsData() {
+            if (!localStorage.getItem('tcmHerbs')) {
+                const herbsData = [
+                    {
+                        id: 1,
+                        name: "人参",
+                        latinName: "Panax ginseng C.A.Mey.",
+                        category: "tonic",
+                        nature: "甘、微苦，微温",
+                        meridian: "归脾、肺、心经",
+                        dosage: "3-9g，另煎兑服；也可研粉吞服，一次2g，一日2次",
+                        effects: "大补元气，复脉固脱，补脾益肺，生津安神。用于体虚欲脱，肢冷脉微，脾虚食少，肺虚喘咳，津伤口渴，内热消渴，久病虚羸，惊悸失眠，阳痿宫冷。",
+                        applications: "1. 用于急救：大剂量的人参(15-30g)煎服或炖服，或以人参注射液(每毫升含生药0.57g)2-4毫升肌肉或静脉注射，可用于心源性休克的急救。\n2. 治疗心血管系统疾病：人参对高血压病、心肌营养不良、冠状动脉硬化、心绞痛等都有一定治疗作用。\n3. 治疗胃和肝脏疾病：对慢性胃炎伴有胃酸缺乏或胃酸过低者，服人参后可见胃纳增加。",
+                        precautions: "1. 实证、热证而正气不虚者忌服。\n2. 反藜芦、畏五灵脂、恶皂荚，应忌同用。\n3. 服人参不宜喝茶和吃萝卜，以免影响药力。\n4. 不宜与葡萄同吃，葡萄中含有鞣酸，极易与人参中的蛋白质结合生成沉淀，影响吸收。",
+                        image: "https://picsum.photos/400/300?random=301"
+                    },
+                    {
+                        id: 2,
+                        name: "黄芪",
+                        latinName: "Astragalus membranaceus (Fisch.) Bunge",
+                        category: "tonic",
+                        nature: "甘，微温",
+                        meridian: "归肺、脾经",
+                        dosage: "9-30g",
+                        effects: "补气固表，利尿托毒，排脓，敛疮生肌。用于气虚乏力，食少便溏，中气下陷，久泻脱肛，便血崩漏，表虚自汗，气虚水肿，痈疽难溃，久溃不敛，血虚萎黄，内热消渴。",
+                        applications: "1. 治疗气虚表卫不固所致的自汗：常与牡蛎、麻黄根等配伍，如牡蛎散。\n2. 治疗脾肺气虚或中气下陷证：常与人参、白术等配伍，如补中益气汤。\n3. 治疗气血不足所致的疮疡内陷，脓成不溃或溃久不敛：常与当归、穿山甲等配伍，如透脓散。",
+                        precautions: "1. 表实邪盛、气滞湿阻、食积内停、阴虚阳亢、痈疽初起或溃后热毒尚盛等证，均不宜用。\n2. 孕妇慎用。",
+                        image: "https://picsum.photos/400/300?random=302"
+                    },
+                    {
+                        id: 3,
+                        name: "金银花",
+                        latinName: "Lonicera japonica Thunb.",
+                        category: "heat-clearing",
+                        nature: "甘，寒",
+                        meridian: "归肺、心、胃经",
+                        dosage: "6-15g",
+                        effects: "清热解毒，疏散风热。用于痈肿疔疮，喉痹，丹毒，热毒血痢，风热感冒，温病发热。",
+                        applications: "1. 治疗外感风热或温病初起：常与连翘、薄荷等配伍，如银翘散。\n2. 治疗热毒疮痈：常与蒲公英、紫花地丁等配伍，如五味消毒饮。\n3. 治疗热毒血痢：单用或与黄连、黄芩等配伍。",
+                        precautions: "脾胃虚寒及气虚疮疡脓清者忌用。",
+                        image: "https://picsum.photos/400/300?random=303"
+                    },
+                    {
+                        id: 4,
+                        name: "丹参",
+                        latinName: "Salvia miltiorrhiza Bunge",
+                        category: "blood-activating",
+                        nature: "苦，微寒",
+                        meridian: "归心、肝经",
+                        dosage: "9-15g",
+                        effects: "活血祛瘀，通经止痛，清心除烦，凉血消痈。用于胸痹心痛，脘腹胁痛，癥瘕积聚，热痹疼痛，心烦不眠，月经不调，痛经经闭，疮疡肿痛。",
+                        applications: "1. 治疗胸痹心痛：常与檀香、砂仁等配伍，如丹参饮。\n2. 治疗月经不调、痛经、经闭：常与当归、川芎等配伍。\n3. 治疗疮疡肿痛：常与金银花、连翘等配伍。",
+                        precautions: "1. 不宜与藜芦同用。\n2. 孕妇慎用。",
+                        image: "https://picsum.photos/400/300?random=304"
+                    },
+                    {
+                        id: 5,
+                        name: "陈皮",
+                        latinName: "Citrus reticulata Blanco",
+                        category: "qi-regulating",
+                        nature: "苦、辛，温",
+                        meridian: "归肺、脾经",
+                        dosage: "3-10g",
+                        effects: "理气健脾，燥湿化痰。用于脘腹胀满，食少吐泻，咳嗽痰多。",
+                        applications: "1. 治疗脾胃气滞证：常与木香、砂仁等配伍。\n2. 治疗湿痰、寒痰咳嗽：常与半夏、茯苓等配伍，如二陈汤。\n3. 治疗胸痹胸中气塞短气：常与枳实、生姜等配伍，如橘皮枳实生姜汤。",
+                        precautions: "1. 气虚及阴虚燥咳者不宜用。\n2. 吐血证慎服。",
+                        image: "https://picsum.photos/400/300?random=305"
+                    },
+                    {
+                        id: 6,
+                        name: "茯苓",
+                        latinName: "Poria cocos (Schw.) Wolf",
+                        category: "dampness-removing",
+                        nature: "甘、淡，平",
+                        meridian: "归心、肺、脾、肾经",
+                        dosage: "9-15g",
+                        effects: "利水渗湿，健脾，宁心。用于水肿尿少，痰饮眩悸，脾虚食少，便溏泄泻，心神不安，惊悸失眠。",
+                        applications: "1. 治疗水肿：常与猪苓、泽泻等配伍，如五苓散。\n2. 治疗脾虚湿盛泄泻：常与白术、山药等配伍，如参苓白术散。\n3. 治疗痰饮：常与桂枝、白术等配伍，如苓桂术甘汤。\n4. 治疗心悸、失眠：常与酸枣仁、远志等配伍。",
+                        precautions: "虚寒精滑或气虚下陷者忌服。",
+                        image: "https://picsum.photos/400/300?random=306"
+                    },
+                    {
+                        id: 7,
+                        name: "当归",
+                        latinName: "Angelica sinensis (Oliv.) Diels",
+                        category: "tonic",
+                        nature: "甘、辛，温",
+                        meridian: "归肝、心、脾经",
+                        dosage: "6-12g",
+                        effects: "补血活血，调经止痛，润肠通便。用于血虚萎黄，眩晕心悸，月经不调，经闭痛经，虚寒腹痛，风湿痹痛，跌扑损伤，痈疽疮疡，肠燥便秘。",
+                        applications: "1. 治疗血虚诸证：常与熟地黄、白芍等配伍，如四物汤。\n2. 治疗血虚血瘀之月经不调、经闭、痛经：常与香附、桃仁等配伍。\n3. 治疗虚寒腹痛：常与生姜、羊肉等配伍，如当归生姜羊肉汤。\n4. 治疗痈疽疮疡：常与金银花、赤芍等配伍。",
+                        precautions: "1. 湿盛中满、大便泄泻者忌服。\n2. 孕妇慎用。",
+                        image: "https://picsum.photos/400/300?random=307"
+                    },
+                    {
+                        id: 8,
+                        name: "黄连",
+                        latinName: "Coptis chinensis Franch.",
+                        category: "heat-clearing",
+                        nature: "苦，寒",
+                        meridian: "归心、脾、胃、肝、胆、大肠经",
+                        dosage: "2-5g",
+                        effects: "清热燥湿，泻火解毒。用于湿热痞满，呕吐吞酸，泻痢，黄疸，高热神昏，心火亢盛，心烦不寐，心悸不宁，血热吐衄，目赤，牙痛，消渴，痈肿疮毒。",
+                        applications: "1. 治疗湿热中阻，脘痞呕恶：常与黄芩、干姜等配伍，如半夏泻心汤。\n2. 治疗泻痢：常与木香配伍，如香连丸。\n3. 治疗高热神昏：常与黄芩、黄柏等配伍，如黄连解毒汤。\n4. 治疗心火亢盛之心烦失眠：常与朱砂、生地黄等配伍，如朱砂安神丸。",
+                        precautions: "1. 脾胃虚寒者忌用。\n2. 阴虚津伤者慎用。",
+                        image: "https://picsum.photos/400/300?random=308"
+                    }
+                ];
+                localStorage.setItem('tcmHerbs', JSON.stringify(herbsData));
+            }
+        }
+
+        // 加载药材内容
+        function loadHerbs(category) {
+            const container = document.getElementById('herbsContainer');
+            container.innerHTML = '';
+            
+            const herbsData = JSON.parse(localStorage.getItem('tcmHerbs'));
+            let filteredData = herbsData;
+            
+            if (category !== 'all') {
+                filteredData = herbsData.filter(item => item.category === category);
+            }
+            
+            // 更新标签状态
+            const tabs = document.querySelectorAll('.herb-tab');
+            tabs.forEach(tab => {
+                const tabCategory = tab.getAttribute('onclick').replace("filterHerbs('", "").replace("')", "");
+                if (tabCategory === category) {
+                    tab.classList.add('active');
+                    tab.classList.remove('hover:bg-green-100');
+                } else {
+                    tab.classList.remove('active');
+                    tab.classList.add('hover:bg-green-100');
+                }
+            });
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="col-span-4 text-center text-gray-500 py-12">暂无相关药材数据</div>';
+                return;
+            }
+            
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'herb-card bg-white rounded-lg overflow-hidden shadow-md transition-all';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-green-800 mb-2">${item.name}</h3>
+                        <p class="text-gray-700 text-sm mb-3">${item.effects.substring(0, 60)}...</p>
+                        <button onclick="showHerbDetail(${item.id})" class="w-full bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg transition-all">
+                            查看详情
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 筛选药材
+        function filterHerbs(category) {
+            loadHerbs(category);
+        }
+
+        // 搜索药材
+        function searchHerbs() {
+            const searchTerm = document.getElementById('herbSearch').value.toLowerCase();
+            if (!searchTerm) {
+                loadHerbs('all');
+                return;
+            }
+            
+            const container = document.getElementById('herbsContainer');
+            container.innerHTML = '';
+            
+            const herbsData = JSON.parse(localStorage.getItem('tcmHerbs'));
+            const filteredData = herbsData.filter(item => 
+                item.name.toLowerCase().includes(searchTerm) || 
+                item.latinName.toLowerCase().includes(searchTerm) ||
+                item.effects.toLowerCase().includes(searchTerm)
+            );
+            
+            if (filteredData.length === 0) {
+                container.innerHTML = '<div class="col-span-4 text-center text-gray-500 py-12">没有找到相关药材</div>';
+                return;
+            }
+            
+            filteredData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'herb-card bg-white rounded-lg overflow-hidden shadow-md transition-all';
+                card.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-green-800 mb-2">${item.name}</h3>
+                        <p class="text-gray-700 text-sm mb-3">${item.effects.substring(0, 60)}...</p>
+                        <button onclick="showHerbDetail(${item.id})" class="w-full bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded-lg transition-all">
+                            查看详情
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // 显示药材详情
+        function showHerbDetail(id) {
+            const herbsData = JSON.parse(localStorage.getItem('tcmHerbs'));
+            const herb = herbsData.find(item => item.id === id);
+            
+            if (herb) {
+                document.getElementById('herbModalTitle').textContent = herb.name;
+                document.getElementById('herbModalImage').src = herb.image;
+                document.getElementById('herbModalImage').alt = herb.name;
+                document.getElementById('herbLatinName').textContent = herb.latinName;
+                document.getElementById('herbNature').textContent = herb.nature;
+                document.getElementById('herbMeridian').textContent = herb.meridian;
+                document.getElementById('herbDosage').textContent = herb.dosage;
+                document.getElementById('herbEffects').textContent = herb.effects;
+                document.getElementById('herbApplications').textContent = herb.applications;
+                document.getElementById('herbPrecautions').textContent = herb.precautions;
+                
+                document.getElementById('herbModal').classList.remove('hidden');
+            }
+        }
+
+        // 关闭药材详情模态框
+        function closeHerbModal() {
+            document.getElementById('herbModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
